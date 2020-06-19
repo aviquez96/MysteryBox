@@ -1,17 +1,18 @@
-version: 2.1
-orbs:
-  node: circleci/node@1.1.6
+version: 2
 jobs:
-  build-and-test:
-    executor:
-      name: node/default
-    steps:
-      - checkout
-      - node/with-cache:
-          steps:
-            - run: npm install
-            - run: npm test
-workflows:
-    build-and-test:
-      jobs:
-        - build-and-test
+ build:
+   working_directory: ~/repo
+   machine: true
+   branches:
+    only:
+      - master
+   steps:
+     - checkout
+     - run: docker login repo.treescale.com -u $DOCKER_USER -p $DOCKER_PASS
+     - run:
+        name: build docker image
+        command: |
+            echo "deploying to development environment"
+            docker build -t my-app .
+            docker tag my-app repo.treescale.com/ralabs/my-app-dev:latest
+            docker push repo.treescale.com/ralabs/my-app-dev:latest
